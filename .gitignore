@@ -7,3 +7,8 @@ __pycache__
 
 # hidden dirs
 .*/
+
+# pypi
+build
+dist
+*.egg-info
