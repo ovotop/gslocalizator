@@ -22,7 +22,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     license="MIT Licence",
 
-    url="https://github.com/ovotop/localizator",
+    url="https://github.com/ovotop/gslocalizator",
     author="JeffreyCao",
     author_email="jeffreycao1024@gmail.com",
 
