@@ -4,6 +4,14 @@ from cfg import *
 import re
 
 
+def cell_fmter(val: str) -> str:
+    return re.sub("\s+", " ", val).strip().replace("%s", "%@").replace("\"", "\\\"")
+
+
+def key_fmter(val: str) -> str:
+    return re.sub("\s+", " ", val).strip().replace("%s", "%@")
+
+
 def request_ios(gslr: GSLr):
     gslr.reset()
     gslr.tran(
@@ -16,7 +24,7 @@ def request_ios(gslr: GSLr):
             'ja': '.datas/ios/strings_biz_a/ja.lproj/Localizable.strings',
         },
         exclude_headers=['//'],
-        cell_formater=exmple_fmter
+        cell_formater=cell_fmter
     ).tran(
         from_sheet_range='main!A1:E',
         with_key_column='iOS（IM）Key',
@@ -43,7 +51,8 @@ def request_android(gslr: GSLr):
             'ja': '.datas/android/strings_biz_a/values-ja-rJP/strings.xml',
         },
         exclude_headers=['//'],
-        cell_formater=exmple_fmter
+        cell_formater=cell_fmter,
+        key_formater=key_fmter
     ).tran(
         from_sheet_range='main!A1:E',
         with_key_column='iOS（IM）Key',
@@ -58,14 +67,10 @@ def request_android(gslr: GSLr):
     ).save(format="Android")
 
 
-def exmple_fmter(val: str) -> str:
-    return re.sub("\s+", " ", val).strip().replace("%s", "%@")
-
-
 def request_flutter(gslr: GSLr):
     gslr.reset()
     gslr.tran(
-        from_sheet_range='bizA!A1:E',
+        from_sheet_range='bizA!A1:F',
         with_key_column='key',
         from_value_column_to_file={
             'zh-Hans': '.datas/flutter/strings_biz_a/intl_zh_CN.arb',
@@ -74,7 +79,8 @@ def request_flutter(gslr: GSLr):
             'ja': '.datas/flutter/strings_biz_a/intl_ja.arb',
         },
         exclude_headers=['//'],
-        cell_formater=exmple_fmter
+        cell_formater=cell_fmter,
+        key_formater=key_fmter
     ).tran(
         from_sheet_range='main!A1:E',
         with_key_column='key',

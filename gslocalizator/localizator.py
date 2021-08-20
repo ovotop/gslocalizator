@@ -36,7 +36,8 @@ class GoogleSheetLocalizator:
              from_value_column_to_file: Dict[str, str],
              with_key_column: Optional[str] = '',
              exclude_headers: Optional[List[str]] = ['//'],
-             cell_formater: Optional[Callable[[str], str]] = (lambda s: s)
+             cell_formater: Optional[Callable[[str], str]] = (lambda s: s),
+             key_formater: Optional[Callable[[str], str]] = (lambda s: s),
              ) -> "GoogleSheetLocalizator":
         '''
         Setting localizator info.
@@ -58,7 +59,8 @@ class GoogleSheetLocalizator:
             from_value_column_to_file=from_value_column_to_file,
             with_key_column=with_key_column,
             exclude_headers=exclude_headers,
-            cell_formater=cell_formater
+            cell_formater=cell_formater,
+            key_formater=key_formater
         ))
         return self
 

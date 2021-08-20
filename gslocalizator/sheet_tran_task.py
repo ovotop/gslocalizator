@@ -23,7 +23,8 @@ class _SheetTranTask:
                  from_value_column_to_file: Dict[str, str],
                  with_key_column: Optional[str] = '',
                  exclude_headers: Optional[str] = [],
-                 cell_formater: Optional[Callable[[str], str]] = (lambda s: s)):
+                 cell_formater: Optional[Callable[[str], str]] = (lambda s: s),
+                 key_formater: Optional[Callable[[str], str]] = None):
 
         self.from_sheet_range = from_sheet_range
         self.sheet_name = get_sheetname_from_range(from_sheet_range)
@@ -31,6 +32,7 @@ class _SheetTranTask:
         self.with_key_column = with_key_column
         self.exclude_headers = exclude_headers
         self.cell_formater = cell_formater
+        self.key_formater = key_formater
         self.string_files = self._init_files(from_value_column_to_file)
 
     def _init_files(self, from_value_column_to_file: Dict[str, str]) -> List[_StringFile]:
@@ -44,29 +46,55 @@ class _SheetTranTask:
         sheet_name_in = get_sheetname_from_range(range_in)
         return sheet_name_in == self.sheet_name
 
-    def _fmt_cells_as_str(self, rows: List[List]):
-        return list(
-            map(lambda r: list(map(lambda c: self.cell_formater(f'{c}'), r)), rows))
+    def _fmt_row(self, row: List) -> List[str]:
+        if row == None or len(row) == 0:
+            return []
+
+        return list(map(lambda c: self.cell_formater(f'{c}'), row))
+
+    def _fmt_row_with_key_idx(self, row: List, key_idx: int) -> List[str]:
+        if row == None or len(row) == 0 or len(row) < key_idx:
+            return []
+        h = row[:key_idx]
+        k = row[key_idx]
+        t = row[key_idx+1:]
+        new_row = []
+        if h != None and len(h) > 0:
+            new_row.extend(self._fmt_row(h))
+
+        new_row.extend([self.key_formater(k)])
+
+        if t != None:
+            if len(t) > 1:
+                new_row.extend(self._fmt_row(t))
+            elif len(t) > 0:
+                new_row.extend(self._fmt_row(t))
+        return new_row
+
+    def _fmt_cells_as_str(self, rows: List[List], key_col_idx: Optional[int] = -1):
+        if key_col_idx >= 0 and self.key_formater != None:
+            return list(map(lambda r: self._fmt_row_with_key_idx(r, key_col_idx), rows))
+        else:
+            return list(map(lambda r: self._fmt_row(r), rows))
 
     def update_rows(self, rows_raw: List[List]):
 
         if rows_raw == None or len(rows_raw) == 0:
             return
 
-        rows = self._fmt_cells_as_str(rows_raw)
-
-        title_row = rows[0]
+        title_row = self._fmt_row(rows_raw[0])
         if title_row == None or len(title_row) <= 2:
             return
-
-        key_col_idx = 0
+        key_col_idx = -1
         if self.with_key_column != None and len(self.with_key_column) > 0:
             key_col_idx = self._find_key_index(title_row)
+
+        data_rows = self._fmt_cells_as_str(rows_raw[1:], key_col_idx)
 
         for stringfile in self.string_files:
             stringfile.update_column_index(title_row, key_col_idx)
 
-        for values_row in rows[1:]:
+        for values_row in data_rows:
             if values_row == None or len(values_row) < key_col_idx+1:
                 continue
 
