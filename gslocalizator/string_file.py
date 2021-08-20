@@ -1,13 +1,6 @@
 from typing import Dict, Optional, List
 from ezutils.files import writelines
 import os
-from enum import Enum
-
-
-class SaveFormat(Enum):
-    iOS = 1,
-    Android = 2,
-    Flutter = 3
 
 
 class _StringFile:
@@ -18,9 +11,13 @@ class _StringFile:
         self.column_index = -1
         self.rows = []  # [[key1, value1],[key2, value2], ...]
 
-    def update_column_index(self, title_row: List[str]):
+    def update_column_index(self, title_row: List[str], key_col_idx: int):
         index = 0
-        for title in title_row:
+        title_without_key = []
+        title_without_key.extend(title_row[:key_col_idx])
+        title_without_key.extend(title_row[key_col_idx+1:])
+
+        for title in title_without_key:
             if self.column_title == title:
                 self.column_index = index
                 return
@@ -32,24 +29,24 @@ class _StringFile:
 
         self.rows.append([key_of_row, value])
 
-    def save(self, format: SaveFormat):
-        # print(f'saving:rows[{len(self.rows)}] {self.filename}')
-
+    def save(self, format: str):
         out_dir, filename = os.path.split(self.filename)
         if not os.path.isdir(out_dir):
             os.makedirs(out_dir)
 
+        print(f'{len(self.rows)} records -> {self.filename}')
         writelines(self._rows_to_save(format), self.filename)
 
-    def _rows_to_save(self, format: SaveFormat):
-        if format == SaveFormat.iOS:
+    def _rows_to_save(self, format: str):
+        if format == "iOS":
             rows_to_save = ["// AUTO-GENERATED"]
             rows_to_save.extend(
-                list(map(lambda row: f"{row[0]} = {row[1]};", self.rows))
+                list(
+                    map(lambda row: f'"{row[0]}" = "{row[1]}";', self.rows))
             )
             return rows_to_save
 
-        if format == SaveFormat.Android:
+        if format == "Android":
             rows_to_save = [
                 '<?xml version="1.0" encoding="utf-8"?>', '', '<resources>']
             rows_to_save.extend(
@@ -61,7 +58,7 @@ class _StringFile:
             )
             return rows_to_save
 
-        if format == SaveFormat.Flutter:
+        if format == "Flutter":
             rows_to_save = ['{']
             rows_to_save.extend(
                 list(map(lambda row: f'    "{row[0]}":"{row[1]}",', self.rows)))

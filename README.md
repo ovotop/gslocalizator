@@ -2,7 +2,6 @@
 ### Quick Start
 ```py
 #!/usr/bin/env python
-from gslocalizator.string_file import SaveFormat
 from gslocalizator import GoogleSheetLocalizator as GSLr
 from cfg import *
 
@@ -20,7 +19,7 @@ def main():
             },
             exclude_headers=['//']
         ).request(
-        ).save(format=SaveFormat.iOS)
+        ).save(format="iOS")
 
 
 if __name__ == '__main__':

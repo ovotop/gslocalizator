@@ -15,8 +15,7 @@ example
 '''
 
 from gslocalizator.sheet_tran_task import _SheetTranTask
-from gslocalizator.string_file import SaveFormat
-from typing import Dict
+from typing import Dict, List
 
 
 class WordsParser:
@@ -31,8 +30,7 @@ class WordsParser:
             if current_tran_task == None:
                 continue
 
-            rows = value_range['values']
-            current_tran_task.update_rows(rows)
+            current_tran_task.update_rows(value_range['values'])
 
     def _get_tran_task_by_range(self, valueRange: str) -> _SheetTranTask:
 
@@ -42,6 +40,8 @@ class WordsParser:
 
         return None
 
-    def save(self, format: SaveFormat):
+    def save(self, format: str):
+        print(f'saving:{format}')
         for task in self.tasks:
             task.save(format)
+        print(f'saved:{format}')

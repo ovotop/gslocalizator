@@ -1,6 +1,6 @@
 from __future__ import print_function
 from gslocalizator.parser import WordsParser
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Callable
 from gslocalizator.sheet_tran_task import _SheetTranTask
 from pprint import pprint
 from google.oauth2.credentials import Credentials
@@ -35,7 +35,8 @@ class GoogleSheetLocalizator:
              from_sheet_range: str,
              from_value_column_to_file: Dict[str, str],
              with_key_column: Optional[str] = '',
-             exclude_headers: Optional[List[str]] = ['//']
+             exclude_headers: Optional[List[str]] = ['//'],
+             cell_formater: Optional[Callable[[str], str]] = (lambda s: s)
              ) -> "GoogleSheetLocalizator":
         '''
         Setting localizator info.
@@ -53,10 +54,11 @@ class GoogleSheetLocalizator:
 
         '''
         self.tran_tasks.append(_SheetTranTask(
-            from_sheet_range,
-            from_value_column_to_file,
-            with_key_column,
-            exclude_headers
+            from_sheet_range=from_sheet_range,
+            from_value_column_to_file=from_value_column_to_file,
+            with_key_column=with_key_column,
+            exclude_headers=exclude_headers,
+            cell_formater=cell_formater
         ))
         return self
 
@@ -112,6 +114,7 @@ class GoogleSheetLocalizator:
             valueRenderOption='UNFORMATTED_VALUE',
             dateTimeRenderOption='SERIAL_NUMBER')
         try:
+            print(f'requesting:{ranges}')
             response = request.execute()
             wp = WordsParser(response, self.tran_tasks)
             return wp

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-from gslocalizator.string_file import SaveFormat
 from gslocalizator import GoogleSheetLocalizator as GSLr
 from cfg import *
+import re
 
 
 def request_ios(gslr: GSLr):
     gslr.reset()
     gslr.tran(
-        from_sheet_range='bizA!A1:E',
+        from_sheet_range='bizA!A1:F',
         with_key_column='key',
         from_value_column_to_file={
             'zh-Hans': '.datas/ios/strings_biz_a/zh-Hans.lproj/Localizable.strings',
@@ -15,7 +15,8 @@ def request_ios(gslr: GSLr):
             'en': '.datas/ios/strings_biz_a/en.lproj/Localizable.strings',
             'ja': '.datas/ios/strings_biz_a/ja.lproj/Localizable.strings',
         },
-        exclude_headers=['//']
+        exclude_headers=['//'],
+        cell_formater=exmple_fmter
     ).tran(
         from_sheet_range='main!A1:E',
         with_key_column='iOS（IM）Key',
@@ -27,7 +28,7 @@ def request_ios(gslr: GSLr):
         },
         exclude_headers=['//']
     ).request(
-    ).save(format=SaveFormat.iOS)
+    ).save(format="iOS")
 
 
 def request_android(gslr: GSLr):
@@ -41,7 +42,8 @@ def request_android(gslr: GSLr):
             'en': '.datas/android/strings_biz_a/values/strings.xml',
             'ja': '.datas/android/strings_biz_a/values-ja-rJP/strings.xml',
         },
-        exclude_headers=['//']
+        exclude_headers=['//'],
+        cell_formater=exmple_fmter
     ).tran(
         from_sheet_range='main!A1:E',
         with_key_column='iOS（IM）Key',
@@ -53,7 +55,11 @@ def request_android(gslr: GSLr):
         },
         exclude_headers=['//']
     ).request(
-    ).save(format=SaveFormat.Android)
+    ).save(format="Android")
+
+
+def exmple_fmter(val: str) -> str:
+    return re.sub("\s+", " ", val).strip().replace("%s", "%@")
 
 
 def request_flutter(gslr: GSLr):
@@ -67,10 +73,11 @@ def request_flutter(gslr: GSLr):
             'en': '.datas/flutter/strings_biz_a/intl_en.arb',
             'ja': '.datas/flutter/strings_biz_a/intl_ja.arb',
         },
-        exclude_headers=['//']
+        exclude_headers=['//'],
+        cell_formater=exmple_fmter
     ).tran(
         from_sheet_range='main!A1:E',
-        with_key_column='iOS（IM）Key',
+        with_key_column='key',
         from_value_column_to_file={
             'zh-Hans': '.datas/flutter/strings_main/intl_zh_CN.arb',
             'zh-Hant': '.datas/flutter/strings_main/intl_zh_TW.arb',
@@ -79,7 +86,7 @@ def request_flutter(gslr: GSLr):
         },
         exclude_headers=['//']
     ).request(
-    ).save(format=SaveFormat.Flutter)
+    ).save(format="Flutter")
 
 
 def main():
