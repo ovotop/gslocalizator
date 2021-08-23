@@ -23,11 +23,11 @@ class _StringFile:
                 return
             index += 1
 
-    def add_row(self, key_of_row, value):
+    def add_row(self, key_of_row, value, is_android_formatted_false=False):
         if key_of_row == None or len(key_of_row) == 0:
             return
 
-        self.rows.append([key_of_row, value])
+        self.rows.append([key_of_row, value, is_android_formatted_false])
 
     def save(self, format: str):
         out_dir, filename = os.path.split(self.filename)
@@ -36,6 +36,12 @@ class _StringFile:
 
         print(f'{len(self.rows)} records -> {self.filename}')
         writelines(self._rows_to_save(format), self.filename)
+
+    def android_formatted_false(self, row):
+        for cell in row:
+            if cell.find('formatted=false') >= 0:
+                return True
+        return False
 
     def _rows_to_save(self, format: str):
         if format == "iOS":
@@ -48,10 +54,18 @@ class _StringFile:
 
         if format == "Android":
             rows_to_save = [
-                '<?xml version="1.0" encoding="utf-8"?>', '', '<resources>']
+                '<?xml version="1.0" encoding="utf-8"?>',
+                '<!-- AUTO-GENERATED  -->'
+                '', '<resources>'
+            ]
+
             rows_to_save.extend(
                 list(
-                    map(lambda row: f'<string name="{row[0]}">{row[1]}</string>', self.rows))
+                    map(lambda row:
+                        f'  <string name="{row[0]}" formatted="false">{row[1]}</string>'
+                        if row[2]
+                        else f'  <string name="{row[0]}">{row[1]}</string>', self.rows))
+
             )
             rows_to_save.extend(
                 ['</resources>']

@@ -129,11 +129,14 @@ class _SheetTranTask:
             if key_of_row.find(exhr) == 0:  # start with exhr
                 return
         for string_file in self.string_files:
+            is_android_formatted_false = string_file.android_formatted_false(
+                row)
             if len(row) < string_file.column_index + 1:
-                string_file.add_row(key_of_row, "")
+                string_file.add_row(key_of_row, "", is_android_formatted_false)
                 continue
             value = row[string_file.column_index]
-            string_file.add_row(key_of_row, value)
+
+            string_file.add_row(key_of_row, value, is_android_formatted_false)
 
     def save(self, format: str):
         for string_file in self.string_files:
