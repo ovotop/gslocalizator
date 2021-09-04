@@ -1,6 +1,7 @@
 
-from typing import Callable, Dict, Optional, List
-from gslocalizator.string_file import _StringFile
+from typing import Callable, Dict, Optional, List, TypeVar, Union, Type
+from gslocalizator.string_file import StringFile
+from functools import reduce
 
 
 def get_sheetname_from_range(from_sheet_range: str) -> str:
@@ -17,7 +18,10 @@ def get_sheetname_from_range(from_sheet_range: str) -> str:
     return name
 
 
-class _SheetTranTask:
+T = TypeVar('T', bound='SheetTranTask')
+
+
+class SheetTranTask:
 
     def __init__(self, from_sheet_range: str,
                  from_value_column_to_file: Dict[str, str],
@@ -35,11 +39,11 @@ class _SheetTranTask:
         self.key_formater = key_formater
         self.string_files = self._init_files(from_value_column_to_file)
 
-    def _init_files(self, from_value_column_to_file: Dict[str, str]) -> List[_StringFile]:
+    def _init_files(self, from_value_column_to_file: Dict[str, str]) -> List[StringFile]:
 
         files = []
         for column_title, filename_to_save in from_value_column_to_file.items():
-            files.append(_StringFile(column_title, filename_to_save))
+            files.append(StringFile(column_title, filename_to_save))
         return files
 
     def is_my_sheet_range(self, range_in: str) -> bool:
@@ -141,3 +145,19 @@ class _SheetTranTask:
     def save(self, format: str):
         for string_file in self.string_files:
             string_file.save(format)
+
+    @classmethod
+    def merge_task_files(cls: Type[T], tran_tasks: List[T]) -> T:
+        string_files = reduce(SheetTranTask.merge_task, tran_tasks)
+        return string_files
+
+    @classmethod
+    def merge_task(cls: Type[T], last_task: T, task: T) -> T:
+        for string_file in task.string_files:
+            if string_file in last_task.string_files:
+                last_task.string_files = [string_file.merge_file(
+                    item) if string_file.filename == item.filename else item for item in last_task.string_files]
+            else:
+                last_task.string_files.append(string_file)
+
+        return last_task

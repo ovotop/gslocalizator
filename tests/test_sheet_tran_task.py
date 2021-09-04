@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from gslocalizator.sheet_tran_task import _SheetTranTask
+from gslocalizator.sheet_tran_task import SheetTranTask
 import unittest
 
 
@@ -35,7 +35,7 @@ class TestSheetTranTask(unittest.TestCase):
         ]
 
         for test_item in test_items:
-            task = _SheetTranTask(
+            task = SheetTranTask(
                 from_sheet_range=test_item['fromSheetRange'],
                 from_value_column_to_file={'': ''})
 

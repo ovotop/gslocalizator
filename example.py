@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 from gslocalizator import GoogleSheetLocalizator as GSLr
 from cfg import *
 import re

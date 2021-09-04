@@ -14,12 +14,12 @@ example
 
 '''
 
-from gslocalizator.sheet_tran_task import _SheetTranTask
+from gslocalizator.sheet_tran_task import SheetTranTask
 from typing import Dict, List
 
 
 class WordsParser:
-    def __init__(self, data_dict: Dict, tasks: _SheetTranTask):
+    def __init__(self, data_dict: Dict, tasks: SheetTranTask):
 
         self.tasks = tasks
 
@@ -32,7 +32,7 @@ class WordsParser:
 
             current_tran_task.update_rows(value_range['values'])
 
-    def _get_tran_task_by_range(self, valueRange: str) -> _SheetTranTask:
+    def _get_tran_task_by_range(self, valueRange: str) -> SheetTranTask:
 
         for task in self.tasks:
             if task.is_my_sheet_range(valueRange):
@@ -42,6 +42,9 @@ class WordsParser:
 
     def save(self, format: str):
         print(f'saving:{format}')
-        for task in self.tasks:
-            task.save(format)
+        save_files = SheetTranTask.merge_task_files(self.tasks).string_files
+        print("--- save_files --")
+        for save_file in save_files:
+            save_file.save(format=format)
+        print("-----------------")
         print(f'saved:{format}')

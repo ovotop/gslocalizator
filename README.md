@@ -69,3 +69,82 @@ def load():
         ).save(format="iOS")
     # ...
 ```
+
+replace "'" to "\'" demo
+```py
+def cell_fmter(val: str) -> str:
+    aVal = re.sub('\w(\')', lambda x: x.group(1), val) # replace "'" to "\'"
+    return re.sub("\s+", " ", aVal).strip().replace("%s", "%@").replace("\"", "\\\"")
+```
+
+### You can merge diffrent sheets to one file.
+
+Sheet "bizA" and sheet "main" merge to "app/***/strings.xml"
+
+```py
+
+def request_android(gslr: GSLr):
+    gslr.reset()
+    gslr.tran(
+        from_sheet_range='bizA!A1:E',
+        with_key_column='key',
+        from_value_column_to_file={
+            'zh-Hans': '.datas/android/app/values-zh-rCN/strings.xml',
+            'zh-Hant': '.datas/android/app/values-zh-rTWj/strings.xml',
+            'en': '.datas/android/app/values/strings.xml',
+            'ja': '.datas/android/app/values-ja-rJP/strings.xml',
+        },
+        exclude_headers=['//'],
+        cell_formater=cell_fmter,
+        key_formater=key_fmter
+    ).tran(
+        from_sheet_range='main!A1:E',
+        with_key_column='iOS（IM）Key',
+        from_value_column_to_file={
+            'zh-Hans': '.datas/android/app/values-zh-rCN/strings.xml',
+            'zh-Hant': '.datas/android/app/values-zh-rTWj/strings.xml',
+            'en': '.datas/android/app/values/strings.xml',
+            'ja': '.datas/android/app/values-ja-rJP/strings.xml',
+        },
+        exclude_headers=['//']
+    ).request(
+    ).save(format="Android")
+
+```
+
+### Or you can write diff sheets to their own files.
+
+Sheet "bizA" save to "strings_biz_a/***/strings.xml"
+
+Sheet "main" save to "strings_main/***/strings.xml"
+
+```py
+
+def request_android(gslr: GSLr):
+    gslr.reset()
+    gslr.tran(
+        from_sheet_range='bizA!A1:E',
+        with_key_column='key',
+        from_value_column_to_file={
+            'zh-Hans': '.datas/android/strings_biz_a/values-zh-rCN/strings.xml',
+            'zh-Hant': '.datas/android/strings_biz_a/values-zh-rTWj/strings.xml',
+            'en': '.datas/android/strings_biz_a/values/strings.xml',
+            'ja': '.datas/android/strings_biz_a/values-ja-rJP/strings.xml',
+        },
+        exclude_headers=['//'],
+        cell_formater=cell_fmter,
+        key_formater=key_fmter
+    ).tran(
+        from_sheet_range='main!A1:E',
+        with_key_column='iOS（IM）Key',
+        from_value_column_to_file={
+            'zh-Hans': '.datas/android/strings_main/values-zh-rCN/strings.xml',
+            'zh-Hant': '.datas/android/strings_main/values-zh-rTWj/strings.xml',
+            'en': '.datas/android/strings_main/values/strings.xml',
+            'ja': '.datas/android/strings_main/values-ja-rJP/strings.xml',
+        },
+        exclude_headers=['//']
+    ).request(
+    ).save(format="Android")
+
+```

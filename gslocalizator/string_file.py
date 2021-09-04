@@ -1,15 +1,38 @@
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, TypeVar
 from ezutils.files import writelines
 import os
 
 
-class _StringFile:
+class _StringRow:
+
+    def __init__(self, k: str, v: str, is_android_formatted_false):
+        self.k = k
+        self.v = v
+        self.is_android_formatted_false = is_android_formatted_false
+
+    def __eq__(self, o: object) -> bool:
+        return o.k == self.k
+
+    def __hash__(self):
+        return hash(self.k)
+
+
+T = TypeVar('T', bound='StringFile')
+
+
+class StringFile:
 
     def __init__(self, column_title: str, filename_to_save: str):
         self.filename = filename_to_save
         self.column_title = column_title
         self.column_index = -1
         self.rows = []  # [[key1, value1],[key2, value2], ...]
+
+    def __eq__(self, o: object) -> bool:
+        return o.filename == self.filename
+
+    def __hash__(self):
+        return hash(self.filename)
 
     def update_column_index(self, title_row: List[str], key_col_idx: int):
         index = 0
@@ -27,15 +50,12 @@ class _StringFile:
         if key_of_row == None or len(key_of_row) == 0:
             return
 
-        self.rows.append([key_of_row, value, is_android_formatted_false])
-
-    def save(self, format: str):
-        out_dir, filename = os.path.split(self.filename)
-        if not os.path.isdir(out_dir):
-            os.makedirs(out_dir)
-
-        print(f'{len(self.rows)} records -> {self.filename}')
-        writelines(self._rows_to_save(format), self.filename)
+        item = _StringRow(key_of_row, value, is_android_formatted_false)
+        if item in self.rows:
+            # replace row with item
+            self.rows = [item if item == row else row for row in self.rows]
+        else:
+            self.rows.append(item)
 
     def android_formatted_false(self, row):
         for cell in row:
@@ -48,7 +68,7 @@ class _StringFile:
             rows_to_save = ["// AUTO-GENERATED"]
             rows_to_save.extend(
                 list(
-                    map(lambda row: f'"{row[0]}" = "{row[1]}";', self.rows))
+                    map(lambda row: f'"{row.k}" = "{row.v}";', self.rows))
             )
             return rows_to_save
 
@@ -62,9 +82,9 @@ class _StringFile:
             rows_to_save.extend(
                 list(
                     map(lambda row:
-                        f'  <string name="{row[0]}" formatted="false">{row[1]}</string>'
-                        if row[2]
-                        else f'  <string name="{row[0]}">{row[1]}</string>', self.rows))
+                        f'  <string name="{row.k}" formatted="false">{row.v}</string>'
+                        if row.is_android_formatted_false
+                        else f'  <string name="{row.k}">{row.v}</string>', self.rows))
 
             )
             rows_to_save.extend(
@@ -75,7 +95,7 @@ class _StringFile:
         if format == "Flutter":
             rows_to_save = ['{']
             rows_to_save.extend(
-                list(map(lambda row: f'    "{row[0]}":"{row[1]}",', self.rows)))
+                list(map(lambda row: f'    "{row.k}":"{row.v}",', self.rows)))
             rows_to_save.extend(
                 ['}']
             )
@@ -83,3 +103,16 @@ class _StringFile:
 
         ex = Exception('Not supported')
         raise ex
+
+    def save(self, format: str):
+        out_dir, filename = os.path.split(self.filename)
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+
+        print(f'{len(self.rows)} records -> {self.filename}')
+        writelines(self._rows_to_save(format), self.filename)
+
+    def merge_file(self, file_to_be_merge: T) -> T:
+        for row in file_to_be_merge.rows:
+            self.add_row(row.k, row.v, row.is_android_formatted_false)
+        return self

@@ -1,7 +1,7 @@
 from __future__ import print_function
 from gslocalizator.parser import WordsParser
 from typing import Dict, List, Optional, Callable
-from gslocalizator.sheet_tran_task import _SheetTranTask
+from gslocalizator.sheet_tran_task import SheetTranTask
 from pprint import pprint
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
@@ -23,7 +23,7 @@ class GoogleSheetLocalizator:
         gsl.__enter__()
         return gsl
 
-    tran_tasks: List[_SheetTranTask]
+    tran_tasks: List[SheetTranTask]
 
     def reset(self):
         self.tran_tasks.clear()
@@ -54,7 +54,7 @@ class GoogleSheetLocalizator:
         self
 
         '''
-        self.tran_tasks.append(_SheetTranTask(
+        self.tran_tasks.append(SheetTranTask(
             from_sheet_range=from_sheet_range,
             from_value_column_to_file=from_value_column_to_file,
             with_key_column=with_key_column,
