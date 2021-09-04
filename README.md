@@ -1,5 +1,11 @@
 
 ### Quick Start
+
+#### Install
+```
+pip3 install gslocalizator
+```
+#### Using
 ```py
 #!/usr/bin/env python
 from gslocalizator import GoogleSheetLocalizator as GSLr
@@ -70,8 +76,8 @@ def load():
     # ...
 ```
 
-replace "'" to "\'" demo
 ```py
+# replace "'" to "\'" demo
 def cell_fmter(val: str) -> str:
     aVal = re.sub('\w(\')', lambda x: x.group(1), val) # replace "'" to "\'"
     return re.sub("\s+", " ", aVal).strip().replace("%s", "%@").replace("\"", "\\\"")
