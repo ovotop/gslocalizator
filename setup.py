@@ -15,7 +15,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gslocalizator",
-    version="0.0.3",
+    version="1.0.0",
     keywords=["google sheet", "localization", "l10n", "i18n"],
     description="update localization texts from google doc",
     long_description=long_description,
